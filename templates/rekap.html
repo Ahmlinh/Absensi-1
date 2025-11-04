@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekap Absensi - Sistem Absensi QR Code</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Rekap Absensi</h1>
+            <p>Database: Supabase Cloud | Total: {{ records|length }} records</p>
+        </div>
+        
+        <div class="content">
+            <div class="actions">
+                <a href="{{ url_for('absen') }}" class="btn">📍 Halaman Absen</a>
+                <button onclick="location.reload()" class="btn secondary">🔄 Refresh Data</button>
+                <a href="{{ url_for('stats') }}" class="btn outline">📈 Lihat Statistik</a>
+                <input type="text" id="searchUser" placeholder="Cari by user ID..." class="search-input">
+                <button onclick="searchUser()" class="btn">🔍 Cari</button>
+            </div>
+            
+            {% if show_stats and stats %}
+            <div class="stats-container">
+                <h3>📈 Statistik Absensi</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ stats.total_absensi }}</div>
+                        <div class="stat-label">Total Absensi</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ stats.absensi_hari_ini }}</div>
+                        <div class="stat-label">Hari Ini</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ stats.unique_users }}</div>
+                        <div class="stat-label">User Unik</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if error %}
+            <div class="status error">
+                <p>{{ error }}</p>
+            </div>
+            {% endif %}
+            
+            {% if user_filter %}
+            <div class="filter-info">
+                <p>Menampilkan data untuk: <strong>{{ user_filter }}</strong></p>
+                <a href="{{ url_for('rekap') }}" class="btn small">👁️ Tampilkan Semua</a>
+            </div>
+            {% endif %}
+            
+            {% if records %}
+            <div class="table-container">
+                <table class="attendance-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>User ID</th>
+                            <th>Nama</th>
+                            <th>Waktu</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in records %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td class="user-id">{{ record.user_id }}</td>
+                            <td>{{ record.nama or record.user_id }}</td>
+                            <td class="timestamp">{{ record.waktu }}</td>
+                            <td class="status-{{ record.status.lower() }}">
+                                {{ record.status }}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('rekap_user', user_id=record.user_id) }}" 
+                                   class="btn small">👤 Lihat User</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pagination-info">
+                <p>Menampilkan {{ records|length }} data absensi</p>
+            </div>
+            {% else %}
+            <div class="no-data">
+                <div class="no-data-icon">📭</div>
+                <h3>Belum Ada Data Absensi</h3>
+                <p>Belum ada data absensi yang tercatat dalam sistem.</p>
+                <a href="{{ url_for('absen') }}" class="btn">Mulai Absensi</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function searchUser() {
+            const userId = document.getElementById('searchUser').value.trim();
+            if (userId) {
+                window.location.href = `/rekap/${userId}`;
+            } else {
+                alert('Masukkan User ID untuk mencari');
+            }
+        }
+        
+        // Enter key support untuk search
+        document.getElementById('searchUser').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchUser();
+            }
+        });
+        
+        // Format timestamps
+        document.addEventListener('DOMContentLoaded', function() {
+            const timestamps = document.querySelectorAll('.timestamp');
+            timestamps.forEach(timestamp => {
+                const original = timestamp.textContent;
+                if (original) {
+                    // Format: "2024-01-01 10:30:00" -> "01 Jan 2024 10:30"
+                    const date = new Date(original + ' UTC');
+                    const formatted = date.toLocaleString('id-ID', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    timestamp.textContent = formatted;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

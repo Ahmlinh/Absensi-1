@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Absensi QR Code</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📅 Sistem Absensi Otomatis QR</h1>
+            <p>Powered by Supabase</p>
+        </div>
+        
+        <div class="content">
+            {% if status == 'success' %}
+            <div class="status success">
+                <div class="icon">✅</div>
+                <h2>Absensi Berhasil!</h2>
+                <p>Terima kasih <strong>{{ user_id }}</strong>, kehadiranmu telah tercatat.</p>
+                <div class="time-info">
+                    <div class="time-item">
+                        <span class="label">Tanggal:</span>
+                        <span class="value">{{ tanggal }}</span>
+                    </div>
+                    <div class="time-item">
+                        <span class="label">Jam:</span>
+                        <span class="value">{{ jam }}</span>
+                    </div>
+                </div>
+                <p class="success-note">Data tersimpan di database cloud Supabase.</p>
+            </div>
+            {% elif status == 'already' %}
+            <div class="status warning">
+                <div class="icon">⚠️</div>
+                <h2>Absensi Gagal</h2>
+                <p>{{ message }}</p>
+                {% if user_id %}
+                <p>User ID: <strong>{{ user_id }}</strong></p>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="status error">
+                <div class="icon">❌</div>
+                <h2>Error</h2>
+                <p>{{ message }}</p>
+            </div>
+            {% endif %}
+            
+            <div class="actions">
+                <a href="{{ url_for('rekap') }}" class="btn">📊 Lihat Rekap</a>
+                <a href="{{ url_for('stats') }}" class="btn secondary">📈 Statistik</a>
+                <a href="{{ url_for('absen') }}" class="btn outline">🔄 Absen Lagi</a>
+            </div>
+            
+            <div class="info-box">
+                <h3>ℹ️ Informasi Sistem</h3>
+                <p>• Database: <strong>Supabase Cloud</strong></p>
+                <p>• Waktu: <strong>WIB (Asia/Jakarta)</strong></p>
+                <p>• Status: <span class="status-live">🟢 Live</span></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
